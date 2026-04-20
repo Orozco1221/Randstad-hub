@@ -8,7 +8,7 @@ import {
   MessageCircle, Users, Bell, Filter, CornerDownRight, Star, History,
   ClipboardList, UploadCloud, Lock, AlertTriangle, Share2, Link as LinkIcon,
   Bot, MessageSquareText, Trash2, Edit3, Medal, Crown, Target, ArrowUp,
-  Lightbulb, Brain, Paperclip
+  Lightbulb, Brain, Paperclip, Mail, LogOut
 } from 'lucide-react';
 
 // ============================================================================
@@ -59,9 +59,84 @@ const ScrollReveal = ({ children, delay = 0, direction = 'up' }) => {
 };
 
 // ============================================================================
+// PANTALLA DE INICIO DE SESIÓN (OAUTH & CREDENCIALES)
+// ============================================================================
+const LoginScreen = ({ onLogin }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = (e) => {
+    if (e) e.preventDefault();
+    setIsLoading(true);
+    // Simulamos el tiempo de respuesta de la validación OAuth / Servidor real
+    setTimeout(() => {
+      setIsLoading(false);
+      onLogin();
+    }, 1500);
+  };
+
+  return (
+    <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center relative overflow-hidden">
+      {/* Decoraciones de fondo animadas */}
+      <div className="absolute top-0 -left-64 w-[600px] h-[600px] bg-blue-200 rounded-full blur-[120px] opacity-30 pointer-events-none animate-pulse" />
+      <div className="absolute bottom-0 -right-64 w-[600px] h-[600px] bg-purple-200 rounded-full blur-[120px] opacity-30 pointer-events-none" />
+
+      <div className="bg-white/80 backdrop-blur-2xl p-10 rounded-[3rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] border border-white w-full max-w-md relative z-10 animate-in fade-in zoom-in duration-500">
+        <div className="flex justify-center mb-6">
+          <svg viewBox="0 0 120 100" className="w-20 h-20 text-[#2761e7]" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10,35 h30 l15,15 v40 h-15 v-33 l-10,-10 h-20 z" />
+            <path d="M110,35 h-30 l-15,15 v40 h15 v-33 l10,-10 h20 z" />
+          </svg>
+        </div>
+        
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-black text-[#1e2b7a] uppercase italic tracking-tighter mb-2">Randstad AI Hub</h2>
+          <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Acceso Seguro Corporativo</p>
+        </div>
+
+        {/* Botón de Google OAuth */}
+        <button onClick={() => handleLogin()} disabled={isLoading} className="w-full bg-white border-2 border-slate-100 p-4 rounded-2xl flex items-center justify-center gap-3 font-black text-slate-700 text-xs uppercase tracking-widest hover:bg-slate-50 hover:border-slate-200 transition-all shadow-sm">
+          <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
+          Continuar con Google
+        </button>
+
+        <div className="flex items-center gap-4 my-8">
+          <div className="h-px bg-slate-200 flex-1"></div>
+          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">O con credenciales</span>
+          <div className="h-px bg-slate-200 flex-1"></div>
+        </div>
+
+        {/* Formulario Tradicional */}
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div className="relative">
+            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="usuario@randstad.es" className="w-full bg-slate-50 p-4 pl-12 rounded-2xl outline-none border-2 border-transparent focus:border-[#3b82f6] focus:bg-white transition-all text-sm font-medium text-slate-800" required />
+          </div>
+          <div className="relative">
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Contraseña" className="w-full bg-slate-50 p-4 pl-12 rounded-2xl outline-none border-2 border-transparent focus:border-[#3b82f6] focus:bg-white transition-all text-sm font-medium text-slate-800" required />
+          </div>
+          <button type="submit" disabled={isLoading} className="w-full bg-[#1e2b7a] text-white p-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-blue-900/20 hover:bg-blue-800 hover:scale-[1.02] transition-all flex items-center justify-center mt-4">
+            {isLoading ? <Loader2 className="animate-spin" size={20} /> : 'Iniciar Sesión'}
+          </button>
+        </form>
+
+        <p className="text-center text-[9px] font-bold text-slate-400 mt-8 uppercase tracking-widest">
+          ¿Problemas de acceso? <a href="#" className="text-[#3b82f6] underline hover:text-blue-700">Soporte IT</a>
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// ============================================================================
 // COMPONENTE PRINCIPAL DE LA APLICACIÓN
 // ============================================================================
 const App = () => {
+  // --- 0. ESTADO DE AUTENTICACIÓN ---
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   // --- 1. ESTADOS DE NAVEGACIÓN Y MODALES ---
   const [activeTab, setActiveTab] = useState('courses'); // Pestaña actual (courses, forum, challenges, ranking)
   const [selectedItem, setSelectedItem] = useState(null); // Curso/Material seleccionado para ver el detalle
@@ -365,6 +440,11 @@ const App = () => {
     );
   };
 
+  // Si el usuario NO está autenticado, bloqueamos la app y mostramos el Login
+  if (!isAuthenticated) {
+    return <LoginScreen onLogin={() => setIsAuthenticated(true)} />;
+  }
+
   // ============================================================================
   // RENDERIZADO DE LA INTERFAZ PRINCIPAL (JSX)
   // ============================================================================
@@ -392,15 +472,15 @@ const App = () => {
           <div className="text-right hidden sm:block">
             <p className="text-xs font-black uppercase text-slate-900 tracking-tighter leading-none">JUAN PÉREZ</p>
             <p className="text-[8px] text-[#3b82f6] font-black uppercase tracking-widest leading-none mt-1">MASTER PROMPTER</p>
+            <button onClick={() => setIsAuthenticated(false)} className="text-[8px] text-red-500 font-bold uppercase tracking-widest mt-1 hover:underline flex items-center gap-1 justify-end ml-auto transition-all">
+              <LogOut size={10} /> Cerrar Sesión
+            </button>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-blue-50 border-2 border-white flex items-center justify-center text-[#3b82f6] font-black shadow-xl ring-1 ring-slate-100 uppercase leading-none">JP</div>
         </div>
       </header>
 
-      {/* --------------------------------------------------------- */}
-      {/* ZONA DE MODALES (SUPERPUESTOS)                            */}
-      {/* --------------------------------------------------------- */}
-      
+      {/* --- MODALES --- */}
       {/* Modal 1: Detalle de Curso/Material de la Academy */}
       {selectedItem && (
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in" onClick={() => {setSelectedItem(null); setAiQuiz(null);}}>
