@@ -25,9 +25,9 @@ const passportData = {
   role: "Master Prompter",
   xp: 1850,
   nextLevelXp: 2500,
-  level: "Explorador",
-  levelIcon: Compass,
-  nextLevel: "Embajador AI",
+  level: "IA Master",
+  levelIcon: Crown,
+  nextLevel: "AI Visionary",
   badges: [
     { id: 1, title: "Primer Prompt", icon: Sparkles, achieved: true, date: "10 Mar 2026", desc: "Interactuaste por primera vez con el Asistente IA de la plataforma." },
     { id: 2, title: "Reto Completado", icon: Trophy, achieved: true, date: "15 Mar 2026", desc: "Superaste tu primer desafío técnico con una puntuación perfecta." },
@@ -156,7 +156,7 @@ const App = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedThreadId, setSelectedThreadId] = useState(null);
   const [selectedPastChallenge, setSelectedPastChallenge] = useState(null);
-  const [selectedBadge, setSelectedBadge] = useState(null); // Nuevo estado para modal de sellos
+  const [selectedBadge, setSelectedBadge] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAddThreadModal, setShowAddThreadModal] = useState(false);
   const [targetCategory, setTargetCategory] = useState(null);
@@ -176,6 +176,8 @@ const App = () => {
   const [showAllRanking, setShowAllRanking] = useState(false);
   const [aiQuiz, setAiQuiz] = useState(null);
   const [mentorResponse, setMentorResponse] = useState("");
+  const [imageSrc, setImageSrc] = useState('/ia-master.png');
+  const [imageError, setImageError] = useState(false);
 
   const [content, setContent] = useState({
     cafeteria: [
@@ -364,6 +366,13 @@ const App = () => {
               <button type="button" onClick={() => suggestDescription(title, setDesc)} disabled={isAiLoading} className="absolute bottom-2 right-2 p-1.5 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 disabled:opacity-30"><Sparkles size={12} /></button>
             </div>
             <input value={url} onChange={e => setUrl(e.target.value)} className="w-full p-4 bg-slate-50 border-none rounded-xl outline-none font-medium text-sm text-[#1A202C]" placeholder="URL recurso (YouTube, PDF...)" required />
+            
+            <div className="flex items-center gap-3 p-4 bg-slate-100 rounded-xl border-2 border-dashed border-slate-200 cursor-pointer hover:bg-slate-200 transition-colors">
+              <Paperclip size={18} className="text-slate-400" />
+              <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest leading-none">Adjuntar desde ordenador</span>
+              <input type="file" className="hidden" />
+            </div>
+
             <button type="submit" className="w-full py-4 bg-blue-600 text-white rounded-xl font-black uppercase italic shadow-lg mt-4">PUBLICAR</button>
           </div>
         </form>
@@ -405,7 +414,6 @@ const App = () => {
       </header>
 
       {/* --- MODALES --- */}
-      {/* Modal 1: Detalle de Curso/Material de la Academy */}
       {selectedItem && (
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in" onClick={() => {setSelectedItem(null); setAiQuiz(null);}}>
           <div className="bg-white rounded-3xl w-full max-w-6xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col md:flex-row animate-in zoom-in duration-300" onClick={e => e.stopPropagation()}>
@@ -435,7 +443,6 @@ const App = () => {
         </div>
       )}
 
-      {/* Modal 2: Detalle de un Hilo del Foro (Comunidad) */}
       {selectedThread && (
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in" onClick={() => setSelectedThreadId(null)}>
           <div className="bg-white rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col animate-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
@@ -445,14 +452,12 @@ const App = () => {
         </div>
       )}
 
-      {/* Modal 3: Histórico de Respuestas en Retos */}
       {selectedPastChallenge && (
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in" onClick={() => setSelectedPastChallenge(null)}>
           <div className="bg-white rounded-[3rem] w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col md:flex-row animate-in zoom-in" onClick={e => e.stopPropagation()}><div className="w-full md:w-1/2 bg-slate-50 p-12 border-r border-slate-100 overflow-y-auto text-[#1e2b7a]"><h3 className="text-3xl font-black text-[#1e2b7a] uppercase italic mb-6 tracking-tighter leading-tight leading-none">{selectedPastChallenge.title}</h3><div className="space-y-8"><div><h4 className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2 leading-none flex items-center gap-2 uppercase leading-none"><Target size={14}/> Objetivo</h4><p className="text-sm font-semibold text-slate-800 leading-relaxed leading-none">{selectedPastChallenge.objective}</p></div><div><h4 className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2 leading-none flex items-center gap-2 uppercase leading-none"><FileText size={14}/> Descripción</h4><p className="text-sm text-slate-500 italic leading-relaxed">"{selectedPastChallenge.description}"</p></div></div></div><div className="w-full md:w-1/2 p-12 relative flex flex-col overflow-y-auto text-[#1e2b7a]"><button onClick={() => setSelectedPastChallenge(null)} className="absolute top-10 right-10 hover:rotate-90 transition-transform"><X size={28}/></button><div className="mb-8"><div className="flex items-center gap-3 mb-5"><div className="p-3 bg-amber-100 rounded-2xl shadow-sm"><Award className="text-[#f59e0b]" size={28}/></div><h4 className="text-xl font-black text-[#1e2b7a] uppercase italic tracking-tighter leading-none uppercase leading-none">Respuesta de Oro</h4></div><div className="bg-amber-50 border-2 border-amber-100 p-8 rounded-[2.5rem] text-[13px] italic text-amber-950 shadow-sm leading-relaxed relative leading-none text-balance leading-relaxed"><span className="text-4xl text-amber-200 absolute -top-2 -left-2 opacity-50">"</span>{selectedPastChallenge.bestResponse}<span className="text-4xl text-amber-200 absolute -bottom-6 -right-2 opacity-50">"</span></div><div className="flex gap-1.5 mt-6 justify-center">{[1,2,3,4,5].map(i => <Star key={i} size={20} className="text-[#f59e0b] fill-[#f59e0b]" />)}</div></div><p className="text-[10px] text-slate-400 font-bold uppercase mt-auto bg-slate-100 p-4 rounded-2xl text-center tracking-widest italic leading-none uppercase leading-none">RETO FINALIZADO</p></div></div>
         </div>
       )}
 
-      {/* Modal 4: Detalle de Sello (Pasaporte) */}
       {selectedBadge && (
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in" onClick={() => setSelectedBadge(null)}>
           <div className="bg-white rounded-[3rem] w-full max-w-sm p-10 shadow-2xl flex flex-col items-center text-center animate-in zoom-in" onClick={e => e.stopPropagation()}>
@@ -544,7 +549,7 @@ const App = () => {
         {activeTab === 'forum' && (
           <div className="animate-in fade-in duration-300 text-[#1e2b7a]">
              <div className="flex justify-between items-start mb-10 text-[#1e2b7a]"><div><h2 className="text-4xl font-black uppercase italic tracking-tighter text-[#1e2b7a] leading-none uppercase leading-none">COMUNIDAD IA</h2><p className="text-[#94a3b8] font-bold text-[12px] mt-2 tracking-widest uppercase italic leading-none">Debate con expertos de Randstad Digital.</p></div><button onClick={() => setShowAddThreadModal(true)} className="bg-[#3b82f6] text-white px-8 py-4 rounded-[1.2rem] font-black uppercase shadow-lg hover:scale-105 transition-all flex items-center gap-2 italic tracking-widest leading-none leading-none"><Plus size={24}/> NUEVO TEMA</button></div>
-             <div className="grid grid-cols-12 gap-8 text-[#1e2b7a]"><aside className="col-span-3 text-[#1e2b7a]"><ScrollReveal direction="left"><div className="bg-white p-8 rounded-[1.5rem] shadow-sm h-fit"><h3 className="text-[10px] font-black uppercase text-[#94a3b8] tracking-[0.2em] mb-6 uppercase leading-none">Categorías</h3>{['PRODUCTIVIDAD', 'CONSULTORÍA', 'LEGAL', 'HERRAMIENTAS'].map(cat => (<div key={cat} className="flex justify-between items-center mb-4 text-[10px] font-black text-[#64748b] hover:text-[#3b82f6] cursor-pointer group uppercase leading-none"><span className="group-hover:translate-x-1 transition-transform">{cat}</span><span className="text-[#cbd5e1]">12</span></div>))}</div></ScrollReveal></aside><div className="col-span-9"><div className="flex gap-10 border-b border-slate-100 mb-8 px-2 font-black text-[10px] tracking-widest text-[#94a3b8] leading-none">{['TRENDING', 'NEW', 'VISTOS'].map(fCat => (<button key={fCat} onClick={() => setForumCategory(fCat.toLowerCase())} className={`pb-4 transition-all ${forumCategory === fCat.toLowerCase() ? 'text-[#3b82f6] border-b-2 border-[#3b82f6]' : ''}`}>{fCat}</button>))}</div><div className="space-y-6">{content.forumThreads.map((thread, idx) => (<ScrollReveal key={thread.id} direction="up" delay={idx * 100}><div onClick={() => setSelectedThreadId(thread.id)} className="bg-white p-8 rounded-[1.8rem] shadow-sm border border-[#f1f5f9] flex items-center justify-between group hover:shadow-md transition-all cursor-pointer text-[#1e2b7a]"><div className="flex items-center gap-6"><div className={`w-14 h-14 rounded-[1.2rem] ${thread.avatar === 'AM' ? 'bg-[#ff7e3b]' : 'bg-[#3b82f6]'} text-white flex items-center justify-center font-black text-md shadow-md uppercase leading-none`}>{thread.avatar}</div><div><h4 className="font-black text-md text-[#1e2b7a] uppercase italic group-hover:text-[#3b82f6] transition-colors leading-tight leading-none leading-none">{thread.title}</h4><p className="text-[10px] font-bold text-[#94a3b8] uppercase mt-1 leading-none">POR {thread.user}</p></div></div><div className="flex items-center gap-10"><span className="bg-[#f1f5f9] px-4 py-1.5 rounded-full text-[9px] font-black text-[#64748b] tracking-widest uppercase leading-none leading-none">{thread.category}</span><div className="flex items-center gap-1 text-[#64748b] font-black text-sm w-8 leading-none"><span>{thread.comments}</span></div><button onClick={(e) => { e.stopPropagation(); likeThread(thread.id); }} className={`flex items-center gap-1 font-black text-sm w-10 transition-all ${thread.likedBy.includes(CURRENT_USER_ID) ? 'text-[#3b82f6] scale-110' : 'text-slate-300 hover:text-[#3b82f6]'}`}><ThumbsUp size={16} fill={thread.likedBy.includes(CURRENT_USER_ID) ? "currentColor" : "none"} /> <span>{thread.likes}</span></button><span className="text-[9px] font-black text-[#cbd5e1] uppercase tracking-tighter leading-none leading-none">{thread.date}</span></div></div></ScrollReveal>))}</div></div></div>
+             <div className="grid grid-cols-12 gap-8 text-[#1e2b7a]"><aside className="col-span-3 text-[#1e2b7a]"><ScrollReveal direction="left"><div className="bg-white p-8 rounded-[1.5rem] shadow-sm h-fit"><h3 className="text-[10px] font-black uppercase text-[#94a3b8] tracking-[0.2em] mb-6 uppercase leading-none">Categorías</h3>{['PRODUCTIVIDAD', 'CONSULTORÍA', 'LEGAL', 'HERRAMIENTAS'].map(cat => (<div key={cat} className="flex justify-between items-center mb-4 text-[10px] font-black text-[#64748b] hover:text-[#3b82f6] cursor-pointer group uppercase leading-none"><span className="group-hover:translate-x-1 transition-transform">{cat}</span><span className="text-[#cbd5e1]">12</span></div>))}</div></ScrollReveal></aside><div className="col-span-9"><div className="flex gap-10 border-b border-slate-100 mb-8 px-2 font-black text-[10px] tracking-widest text-[#94a3b8] leading-none">{['TRENDING', 'NEW', 'VISTOS'].map(fCat => (<button key={fCat} onClick={() => setForumCategory(fCat.toLowerCase())} className={`pb-4 transition-all ${forumCategory === fCat.toLowerCase() ? 'text-[#3b82f6] border-b-2 border-[#3b82f6]' : ''}`}>{fCat}</button>))}</div><div className="space-y-6">{content.forumThreads.map((thread, idx) => (<ScrollReveal key={thread.id} direction="up" delay={idx * 100}><div onClick={() => setSelectedThreadId(thread.id)} className="bg-white p-8 rounded-[1.8rem] shadow-sm border border-[#f1f5f9] flex items-center justify-between group hover:shadow-md transition-all cursor-pointer text-[#1e2b7a]"><div className="flex items-center gap-6"><div className={`w-14 h-14 rounded-[1.2rem] ${thread.avatar === 'AM' ? 'bg-[#ff7e3b]' : 'bg-[#3b82f6]'} text-white flex items-center justify-center font-black text-md shadow-md uppercase leading-none`}>{thread.avatar}</div><div><h4 className="font-black text-md text-[#1e2b7a] uppercase italic group-hover:text-[#3b82f6] transition-colors leading-tight leading-none">{thread.title}</h4><p className="text-[10px] font-bold text-[#94a3b8] uppercase mt-1 leading-none">POR {thread.user}</p></div></div><div className="flex items-center gap-10"><span className="bg-[#f1f5f9] px-4 py-1.5 rounded-full text-[9px] font-black text-[#64748b] tracking-widest uppercase leading-none leading-none">{thread.category}</span><div className="flex items-center gap-1 text-[#64748b] font-black text-sm w-8 leading-none"><span>{thread.comments}</span></div><button onClick={(e) => { e.stopPropagation(); likeThread(thread.id); }} className={`flex items-center gap-1 font-black text-sm w-10 transition-all ${thread.likedBy.includes(CURRENT_USER_ID) ? 'text-[#3b82f6] scale-110' : 'text-slate-300 hover:text-[#3b82f6]'}`}><ThumbsUp size={16} fill={thread.likedBy.includes(CURRENT_USER_ID) ? "currentColor" : "none"} /> <span>{thread.likes}</span></button><span className="text-[9px] font-black text-[#cbd5e1] uppercase tracking-tighter leading-none leading-none">{thread.date}</span></div></div></ScrollReveal>))}</div></div></div>
           </div>
         )}
 
@@ -687,29 +692,84 @@ const App = () => {
 
             {/* BLOQUE 1: PORTADA DEL PASAPORTE */}
             <ScrollReveal direction="up">
-              <div className="max-w-2xl mx-auto bg-white p-10 rounded-[4rem] shadow-xl border border-slate-100 flex flex-col items-center text-center relative overflow-hidden group">
+              <div className="max-w-2xl mx-auto bg-[#0B132B] p-12 rounded-[4rem] shadow-2xl border border-[#1e2b7a] flex flex-col items-center text-center relative overflow-hidden group">
                  {/* Fondo decorativo */}
-                 <div className="absolute top-0 -left-10 w-40 h-40 bg-[#f59e0b] rounded-full blur-[80px] opacity-20 pointer-events-none" />
-                 <div className="absolute bottom-0 -right-10 w-40 h-40 bg-[#3b82f6] rounded-full blur-[80px] opacity-10 pointer-events-none" />
+                 <div className="absolute top-0 -left-10 w-64 h-64 bg-[#f59e0b] rounded-full blur-[100px] opacity-20 pointer-events-none" />
+                 <div className="absolute bottom-0 -right-10 w-64 h-64 bg-[#3b82f6] rounded-full blur-[100px] opacity-20 pointer-events-none" />
 
-                 <div className="w-28 h-28 bg-[#f59e0b] rounded-full flex items-center justify-center text-4xl font-black text-white shadow-lg mb-6 ring-4 ring-amber-50 uppercase z-10">JP</div>
-                 <h3 className="text-3xl font-black uppercase italic tracking-tighter leading-none mb-2 z-10">{passportData.name}</h3>
-                 <p className="text-[#3b82f6] font-bold uppercase tracking-widest text-sm mb-8 z-10">{passportData.role}</p>
+                 {/* INSIGNIA IA MASTER (IMAGEN ORIGINAL O FALLBACK) */}
+                 <div className="relative mb-12 z-10 flex flex-col items-center mt-4 min-h-[220px] justify-center">
+                   {!imageError ? (
+                     <img 
+                       src={imageSrc} 
+                       alt="Insignia IA Master" 
+                       onError={() => {
+                         if (imageSrc === '/ia-master.png') setImageSrc('/ia-master.jpg');
+                         else setImageError(true);
+                       }}
+                       className="w-72 object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,0.6)] hover:scale-105 transition-transform duration-500 rounded-[2rem]"
+                     />
+                   ) : (
+                     <div className="relative z-10 flex flex-col items-center scale-110 mb-6">
+                       {/* Alas Izquierda */}
+                       <div className="absolute top-1/2 -translate-y-1/2 -left-16 flex flex-col gap-1.5 -rotate-12 z-0">
+                         <div className="w-14 h-3.5 bg-gradient-to-r from-transparent via-amber-200 to-amber-500 rounded-full -translate-x-4 shadow-sm"></div>
+                         <div className="w-18 h-3.5 bg-gradient-to-r from-transparent via-amber-300 to-amber-600 rounded-full -translate-x-2 shadow-sm"></div>
+                         <div className="w-16 h-3.5 bg-gradient-to-r from-transparent via-amber-400 to-amber-700 rounded-full -translate-x-1 shadow-sm"></div>
+                         <div className="w-12 h-3.5 bg-gradient-to-r from-transparent via-amber-500 to-amber-800 rounded-full shadow-sm"></div>
+                       </div>
+
+                       {/* Alas Derecha */}
+                       <div className="absolute top-1/2 -translate-y-1/2 -right-16 flex flex-col gap-1.5 items-end rotate-12 z-0">
+                         <div className="w-14 h-3.5 bg-gradient-to-l from-transparent via-amber-200 to-amber-500 rounded-full translate-x-4 shadow-sm"></div>
+                         <div className="w-18 h-3.5 bg-gradient-to-l from-transparent via-amber-300 to-amber-600 rounded-full translate-x-2 shadow-sm"></div>
+                         <div className="w-16 h-3.5 bg-gradient-to-l from-transparent via-amber-400 to-amber-700 rounded-full translate-x-1 shadow-sm"></div>
+                         <div className="w-12 h-3.5 bg-gradient-to-l from-transparent via-amber-500 to-amber-800 rounded-full shadow-sm"></div>
+                       </div>
+
+                       {/* Corona Superior */}
+                       <div className="absolute -top-12 text-amber-400 z-20 drop-shadow-[0_5px_5px_rgba(0,0,0,0.3)]">
+                         <Crown size={64} className="fill-amber-400 text-amber-600" strokeWidth={1} />
+                       </div>
+
+                       {/* Cuerpo del Escudo */}
+                       <div className="w-40 h-40 rounded-3xl bg-gradient-to-br from-amber-100 via-amber-500 to-amber-800 p-1.5 shadow-[0_0_40px_rgba(245,158,11,0.4)] relative z-10">
+                         <div className="w-full h-full rounded-[1.4rem] bg-gradient-to-b from-[#1a2b7a] to-slate-900 border-2 border-amber-900/50 flex flex-col items-center justify-center relative overflow-hidden shadow-inner">
+                            <div className="absolute top-0 left-0 right-0 h-16 bg-white/10 blur-xl rounded-full"></div>
+                            <Brain size={60} className="text-amber-300 drop-shadow-[0_0_15px_rgba(245,158,11,0.8)]" strokeWidth={1.5} />
+                         </div>
+                       </div>
+
+                       {/* Banner IA MASTER */}
+                       <div className="absolute -bottom-3 bg-gradient-to-r from-amber-700 via-amber-400 to-amber-700 text-[#1e2b7a] px-6 py-1.5 rounded-sm font-black text-sm border-y border-amber-100 shadow-[0_10px_20px_rgba(0,0,0,0.5)] z-20 tracking-widest whitespace-nowrap">
+                         IA MASTER
+                       </div>
+                       
+                       {/* Puntos */}
+                       <div className="absolute -bottom-10 bg-slate-900 text-amber-400 px-4 py-1 rounded-lg font-black text-xs border border-amber-500/30 shadow-lg z-10">
+                         400+ pts
+                       </div>
+                     </div>
+                   )}
+                 </div>
+
+                 <h3 className="text-4xl font-black uppercase italic tracking-tighter leading-none mb-2 z-10 text-white">{passportData.name}</h3>
+                 <p className="text-amber-400 font-bold uppercase tracking-widest text-sm mb-10 z-10">{passportData.role}</p>
                  
-                 <div className="w-full bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100 z-10">
+                 <div className="w-full bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/10 z-10">
                    <div className="flex justify-between items-end mb-4">
-                     <div className="flex items-center gap-2 text-slate-700 font-black uppercase tracking-widest text-sm">
+                     <div className="flex items-center gap-2 text-white font-black uppercase tracking-widest text-sm">
                        <passportData.levelIcon size={20} className="text-[#f59e0b]"/> {passportData.level}
                      </div>
-                     <div className="text-right">
-                       <span className="text-2xl font-black italic text-[#1e2b7a] leading-none">{passportData.xp}</span>
-                       <span className="text-xs text-slate-400 font-bold ml-1 uppercase leading-none">XP</span>
+                     <div className="text-right text-white">
+                       <span className="text-3xl font-black italic leading-none">{passportData.xp}</span>
+                       <span className="text-xs text-white/50 font-bold ml-1 uppercase leading-none">XP</span>
                      </div>
                    </div>
-                   <div className="h-4 bg-slate-200 rounded-full w-full overflow-hidden relative">
-                     <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#f59e0b] to-amber-300 rounded-full transition-all duration-1000 ease-out" style={{ width: `${(passportData.xp / passportData.nextLevelXp) * 100}%` }}></div>
+                   <div className="h-4 bg-black/40 rounded-full w-full overflow-hidden relative shadow-inner">
+                     <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-amber-600 via-amber-400 to-amber-200 rounded-full transition-all duration-1000 ease-out" style={{ width: `${(passportData.xp / passportData.nextLevelXp) * 100}%` }}></div>
                    </div>
-                   <p className="text-[10px] font-bold text-slate-400 mt-4 uppercase tracking-widest text-right leading-none">Siguiente nivel: {passportData.nextLevel} ({passportData.nextLevelXp} XP)</p>
+                   <p className="text-[10px] font-bold text-white/40 mt-4 uppercase tracking-widest text-right leading-none">Siguiente nivel: {passportData.nextLevel} ({passportData.nextLevelXp} XP)</p>
                  </div>
               </div>
             </ScrollReveal>
